@@ -10,3 +10,6 @@ tsdoc-metadata.json
 .vscode
 .env
 .vs
+playwright-report/
+test-results/
+blob-report/

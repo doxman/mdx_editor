@@ -1,6 +1,6 @@
 import React from 'react'
 import { describe, expect, it, test, vi } from 'vitest'
-import { codeBlockPlugin, codeMirrorPlugin, MDXEditor, MDXEditorMethods } from '../'
+import { codeBlockPlugin, codeMirrorPlugin, MDXEditor, MDXEditorMethods, thematicBreakPlugin } from '../'
 import { render } from '@testing-library/react'
 import { $getRoot, createEditor, ParagraphNode, TextNode } from 'lexical'
 import { QuoteNode } from '@lexical/rich-text'
@@ -185,6 +185,45 @@ After fence.
     expect(html).toContain('some content')
     expect(html).toContain('After fence.')
     expect(ref.current?.getMarkdown().trim()).toEqual(markdown)
+  })
+
+  it('imports valid and malformed code block JSON without leaking invalid custom fields', () => {
+    const editor = createEditor({
+      namespace: 'code-block-json-test',
+      nodes: [CodeBlockNode],
+      onError(error) {
+        throw error
+      }
+    })
+
+    editor.update(
+      () => {
+        const serializedNodes = [
+          CodeBlockNode.importJSON({
+            type: 'codeblock',
+            version: 1,
+            code: 'const valid = true',
+            language: 'ts',
+            meta: 'live'
+          }),
+          CodeBlockNode.importJSON({ type: 'codeblock', version: 1 }),
+          CodeBlockNode.importJSON({ type: 'codeblock', version: 1, code: 42, language: null, meta: false })
+        ]
+        expect(serializedNodes.map((node) => node.exportJSON())).toEqual([
+          { type: 'codeblock', version: 1, code: 'const valid = true', language: 'ts', meta: 'live' },
+          { type: 'codeblock', version: 1, code: '', language: '', meta: '' },
+          { type: 'codeblock', version: 1, code: '', language: '', meta: '' }
+        ])
+      },
+      { discrete: true }
+    )
+  })
+
+  it('round-trips thematic breaks through the retained React node path', () => {
+    const ref = React.createRef<MDXEditorMethods>()
+    render(<MDXEditor ref={ref} markdown={'Before\n\n***\n\nAfter'} plugins={[thematicBreakPlugin()]} />)
+
+    expect(ref.current?.getMarkdown().trim()).toEqual('Before\n\n***\n\nAfter')
   })
 })
 

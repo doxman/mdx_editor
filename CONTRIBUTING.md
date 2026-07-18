@@ -33,8 +33,60 @@ This starts Ladle on <http://localhost:61000> where you can browse and test the 
 
 - `npm test` - Run Vitest in watch mode
 - `npm run test:once` - Run Vitest once (CI mode)
+- `npm run test:compat` - Run the focused jsdom and three-browser Lexical compatibility gate
+- `npm run test:lexical-versions` - Assert that the complete installed Lexical graph is on the supported lockstep version
+- `npm run test:package` - Pack the built library and verify React 18 and React 19 consumers
+- `npm run test:cross-version` - Replay the compatibility fixture through the packed package and the published legacy package
 
 Tests are located in `src/test/**/*.test.{ts,tsx}`
+
+### Browser compatibility tests
+
+Install the Playwright-matched browsers once after installing dependencies:
+
+```bash
+npm exec playwright install chromium firefox webkit
+```
+
+The browser tooling requires Node.js 18 or newer. This does not change the library's published Node.js engine support.
+
+Run the complete Lexical compatibility contract with `npm run test:compat`. The focused commands below localize a failure without replaying every passing phase:
+
+```bash
+npm run test:compat:unit
+npm run test:browser
+npm run test:browser -- --project=chromium
+npm run test:browser -- --project=firefox
+npm run test:browser -- --project=webkit
+npm run test:browser -- --project=chromium --grep CX-3
+```
+
+Playwright owns the Ladle service and port `61000` for browser runs, including shutdown after success or failure. Do not start a separate Ladle process on that port while running the suite. Failure traces, screenshots, and videos are written under `test-results/`; the HTML report is written to `playwright-report/`. CI uploads both directories when the browser job fails.
+
+The paste scenario dispatches a real DOM `ClipboardEvent` with `text/plain` data as a deterministic browser-handling proxy. It does not certify OS clipboard permissions or integration. Mobile browsers and exhaustive IME behavior are outside this compatibility gate.
+
+### Packed-package compatibility tests
+
+Build the package and install the Playwright-matched Chromium browser before running the package gates:
+
+```bash
+npm run build
+npm exec playwright install chromium
+npm run test:package
+npm run test:cross-version
+```
+
+Both commands pack `dist`, create disposable consumers, and use an isolated temporary npm cache. `test:package` typechecks, Vite-bundles, serves, and renders the artifact with the pinned React 18 and React 19 toolchains. `test:cross-version` captures the packed package's public-ref Markdown, installs published `@mdxeditor/editor@4.0.4` with its complete Lexical graph pinned to 0.35.0, and directly replays the captured document.
+
+Use these failure-local commands while iterating:
+
+```bash
+npm run test:package -- --react=18
+npm run test:package -- --react=19
+npm run test:cross-version
+```
+
+The gates require npm registry access for their disposable installations. They own their Chromium pages, preview servers, allocated loopback ports, tarballs, caches, and temporary applications, and clean them up on success or failure.
 
 ## Project Architecture
 

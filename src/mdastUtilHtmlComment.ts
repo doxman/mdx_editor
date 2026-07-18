@@ -3,9 +3,14 @@
 import type { Handle, Transform } from 'mdast-util-from-markdown'
 import { factorySpace } from 'micromark-factory-space'
 import { markdownLineEnding } from 'micromark-util-character'
-import { codes, types } from 'micromark-util-symbol'
 
 import type { Code, Extension, Tokenizer } from 'micromark-util-types'
+
+// These are the only micromark symbols used by the tokenizer. Keeping their
+// literal values typed locally avoids losing their declarations when tools
+// resolve micromark-util-symbol's declaration-only default export.
+const codes = { dash: 45, eof: null, exclamationMark: 33, greaterThan: 62 } as const
+const types = { data: 'data', lineEnding: 'lineEnding', linePrefix: 'linePrefix' } as const
 
 declare module 'micromark-util-types' {
   interface TokenTypeMap {

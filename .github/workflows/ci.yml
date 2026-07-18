@@ -39,6 +39,42 @@ jobs:
       - name: Test
         run: npm run test:once
 
+  browser-compatibility:
+    name: Browser compatibility
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        with:
+          node-version: 'lts/*'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npm exec playwright install --with-deps chromium firefox webkit
+
+      - name: Test browser compatibility
+        run: npm run test:browser
+
+      - name: Upload browser failure artifacts
+        if: ${{ failure() && !cancelled() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: browser-compatibility-${{ github.run_attempt }}
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 14
+
   build-js:
     name: Build JS
     runs-on: ubuntu-latest
@@ -58,8 +94,20 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Install package-gate browser
+        run: npm exec playwright install --with-deps chromium
+
       - name: Build
         run: npm run build
+
+      - name: Verify Lexical package graph
+        run: npm run test:lexical-versions
+
+      - name: Verify packed React consumers
+        run: npm run test:package
+
+      - name: Verify cross-version Markdown
+        run: npm run test:cross-version
 
   build-docs:
     name: Build Docs

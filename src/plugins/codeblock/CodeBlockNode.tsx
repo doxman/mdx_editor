@@ -68,8 +68,10 @@ export class CodeBlockNode extends DecoratorNode<JSX.Element> {
     this.__focusEmitter = voidEmitter()
   }
 
-  static importJSON(serializedNode: SerializedCodeBlockNode): CodeBlockNode {
-    const { code, meta, language } = serializedNode
+  static importJSON(serializedNode: SerializedLexicalNode & Record<string, unknown>): CodeBlockNode {
+    const code = typeof serializedNode.code === 'string' ? serializedNode.code : ''
+    const language = typeof serializedNode.language === 'string' ? serializedNode.language : ''
+    const meta = typeof serializedNode.meta === 'string' ? serializedNode.meta : ''
     return $createCodeBlockNode({
       code,
       language,

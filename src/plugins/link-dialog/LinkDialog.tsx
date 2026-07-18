@@ -231,7 +231,8 @@ export const LinkDialog: React.FC = () => {
             <>
               <a
                 className={styles.linkDialogPreviewAnchor}
-                href={linkDialogState.url}
+                data-testid="link-dialog-preview"
+                href={linkDialogState.href ?? 'about:blank'}
                 {...(urlIsExternal ? { target: '_blank', rel: 'noreferrer' } : {})}
                 onClick={(e) => {
                   if (onClickLinkCallback !== null) {
