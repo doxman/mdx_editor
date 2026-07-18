@@ -19,12 +19,12 @@ import {
 } from '@lexical/markdown'
 import { MarkdownShortcutPlugin } from '@lexical/react/LexicalMarkdownShortcutPlugin'
 import { $createHeadingNode, $isHeadingNode, HeadingNode, HeadingTagType } from '@lexical/rich-text'
-import { ElementNode, LexicalNode } from 'lexical'
+import { ElementNode } from 'lexical'
 import { realmPlugin } from '../../RealmWithPlugins'
 import { $createCodeBlockNode, CodeBlockNode } from '../codeblock/CodeBlockNode'
 import { activePlugins$, addComposerChild$, addNestedEditorChild$, addTableCellEditorChild$ } from '../core'
 import { HEADING_LEVEL, allowedHeadingLevels$ } from '../headings'
-import { $createHorizontalRuleNode, $isHorizontalRuleNode, HorizontalRuleNode } from '@lexical/react/LexicalHorizontalRuleNode'
+import { THEMATIC_BREAK_TRANSFORMER } from '../thematic-break/transformer'
 
 /**
  * A plugin that adds markdown shortcuts to the editor.
@@ -51,27 +51,6 @@ const createBlockNode = (createNode: (match: string[]) => ElementNode): ElementT
     parentNode.replace(node)
     node.select(0, 0)
   }
-}
-
-const THEMATIC_BREAK: ElementTransformer = {
-  dependencies: [HorizontalRuleNode],
-  export: (node: LexicalNode) => {
-    return $isHorizontalRuleNode(node) ? '***' : null
-  },
-  regExp: /^(---|\*\*\*|___)\s?$/,
-  replace: (parentNode, _1, _2, isImport) => {
-    const line = $createHorizontalRuleNode()
-
-    // TODO: Get rid of isImport flag
-    if (isImport || parentNode.getNextSibling() != null) {
-      parentNode.replace(line)
-    } else {
-      parentNode.insertBefore(line)
-    }
-
-    line.selectNext()
-  },
-  type: 'element'
 }
 
 const LIST_TRANSFORMERS: ReadonlySet<Transformer> = new Set([ORDERED_LIST, UNORDERED_LIST, CHECK_LIST])
@@ -116,7 +95,7 @@ function pickTransformersForActivePlugins(pluginIds: string[], allowedHeadingLev
   }
 
   if (pluginIds.includes('thematicBreak')) {
-    transformers.push(THEMATIC_BREAK)
+    transformers.push(THEMATIC_BREAK_TRANSFORMER)
   }
 
   if (pluginIds.includes('quote')) {

@@ -3,9 +3,13 @@
 import type { Handle, Transform } from 'mdast-util-from-markdown'
 import { factorySpace } from 'micromark-factory-space'
 import { markdownLineEnding } from 'micromark-util-character'
-import { codes, types } from 'micromark-util-symbol'
+import { codes as rawCodes, types as rawTypes } from 'micromark-util-symbol'
 
-import type { Code, Extension, Tokenizer } from 'micromark-util-types'
+import type { Code, Extension, Tokenizer, TokenType } from 'micromark-util-types'
+
+// Type these to avoid moduleResolution issues
+const codes = rawCodes as Record<string, Code>
+const types = rawTypes as Record<string, TokenType>
 
 declare module 'micromark-util-types' {
   interface TokenTypeMap {

@@ -1,6 +1,9 @@
 import { realmPlugin } from '../../RealmWithPlugins'
-import { HorizontalRuleNode, INSERT_HORIZONTAL_RULE_COMMAND } from '@lexical/react/LexicalHorizontalRuleNode.js'
-import { HorizontalRulePlugin } from '@lexical/react/LexicalHorizontalRulePlugin.js'
+import { INSERT_HORIZONTAL_RULE_COMMAND } from '@lexical/extension'
+// eslint-disable-next-line @typescript-eslint/no-deprecated
+import { HorizontalRuleNode } from '@lexical/react/LexicalHorizontalRuleNode'
+// eslint-disable-next-line @typescript-eslint/no-deprecated
+import { HorizontalRulePlugin } from '@lexical/react/LexicalHorizontalRulePlugin'
 import { Action, withLatestFrom } from '@mdxeditor/gurx'
 import { activeEditor$, addActivePlugin$, addComposerChild$, addExportVisitor$, addImportVisitor$, addLexicalNode$ } from '../core'
 import { LexicalThematicBreakVisitor } from './LexicalThematicBreakVisitor'
@@ -25,8 +28,10 @@ export const thematicBreakPlugin = realmPlugin({
     realm.pubIn({
       [addActivePlugin$]: 'thematicBreak',
       [addImportVisitor$]: MdastThematicBreakVisitor,
+      // eslint-disable-next-line @typescript-eslint/no-deprecated
       [addLexicalNode$]: HorizontalRuleNode,
       [addExportVisitor$]: LexicalThematicBreakVisitor,
+      // eslint-disable-next-line @typescript-eslint/no-deprecated
       [addComposerChild$]: HorizontalRulePlugin
     })
   }

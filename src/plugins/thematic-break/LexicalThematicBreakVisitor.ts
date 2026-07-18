@@ -1,4 +1,4 @@
-import { $isHorizontalRuleNode, HorizontalRuleNode } from '@lexical/react/LexicalHorizontalRuleNode.js'
+import { $isHorizontalRuleNode, HorizontalRuleNode } from '@lexical/extension'
 import * as Mdast from 'mdast'
 import { LexicalExportVisitor } from '../../exportMarkdownFromLexical'
 
