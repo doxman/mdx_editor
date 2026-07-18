@@ -2,6 +2,7 @@ import { useCellValue, useCellValues, usePublisher, useRealm } from '@mdxeditor/
 import React, { JSX } from 'react'
 import {
   activeEditor$,
+  activePlugins$,
   AdditionalLexicalNode,
   bottomAreaChildren$,
   composerChildren$,
@@ -10,10 +11,7 @@ import {
   corePlugin,
   editorRootElementRef$,
   editorWrappers$,
-  exportVisitors$,
   insertMarkdown$,
-  jsxComponentDescriptors$,
-  jsxIsAvailable$,
   markdown$,
   markdownSourceEditorValue$,
   placeholder$,
@@ -21,8 +19,6 @@ import {
   contentEditableWrapperElement$,
   setMarkdown$,
   spellCheck$,
-  toMarkdownExtensions$,
-  toMarkdownOptions$,
   topAreaChildren$,
   Translation,
   useTranslation,
@@ -271,20 +267,9 @@ const Methods: React.FC<{ mdxRef: React.ForwardedRef<MDXEditorMethods> }> = ({ m
             return ''
           }
 
-          // Get all export parameters from realm
-          const visitors = realm.getValue(exportVisitors$)
-          const toMarkdownExtensions = realm.getValue(toMarkdownExtensions$)
-          const toMarkdownOptions = realm.getValue(toMarkdownOptions$)
-          const jsxComponentDescriptors = realm.getValue(jsxComponentDescriptors$)
-          const jsxIsAvailable = realm.getValue(jsxIsAvailable$)
+          const activePlugins = realm.getValue(activePlugins$)
 
-          return getSelectionAsMarkdown(activeEditor, {
-            visitors,
-            toMarkdownExtensions,
-            toMarkdownOptions,
-            jsxComponentDescriptors,
-            jsxIsAvailable
-          })
+          return getSelectionAsMarkdown(activeEditor, activePlugins)
         }
       }
     },

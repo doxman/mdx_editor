@@ -4,17 +4,20 @@ import * as Mdast from 'mdast'
 import { gfmTableFromMarkdown, gfmTableToMarkdown, Options as GfmTableOptions } from 'mdast-util-gfm-table'
 import { gfmTable } from 'micromark-extension-gfm-table'
 import {
+  addActivePlugin$,
   addExportVisitor$,
   addImportVisitor$,
   addLexicalNode$,
   addMdastExtension$,
   addSyntaxExtension$,
   addToMarkdownExtension$,
-  insertDecoratorNode$
+  insertDecoratorNode$,
+  toMarkdownExtensions$
 } from '../core'
 import { LexicalTableVisitor } from './LexicalTableVisitor'
 import { MdastTableVisitor } from './MdastTableVisitor'
 import { $createTableNode, TableNode } from './TableNode'
+import { setTableTransformerExtensions } from './transformer'
 export * from './TableNode'
 
 function seedTable(rows = 1, columns = 1): Mdast.Table {
@@ -82,6 +85,7 @@ export const insertTable$ = Signal<{
 export const tablePlugin = realmPlugin<GfmTableOptions>({
   init(realm, params) {
     realm.pubIn({
+      [addActivePlugin$]: 'table',
       // import
       [addMdastExtension$]: gfmTableFromMarkdown(),
       [addSyntaxExtension$]: gfmTable(),
@@ -93,6 +97,11 @@ export const tablePlugin = realmPlugin<GfmTableOptions>({
         tableCellPadding: params?.tableCellPadding ?? true,
         tablePipeAlign: params?.tablePipeAlign ?? true
       })
+    })
+
+    // Subscribe to toMarkdownExtensions$ to keep the transformer in sync with active extensions
+    realm.sub(toMarkdownExtensions$, (extensions) => {
+      setTableTransformerExtensions(extensions)
     })
   }
 })
