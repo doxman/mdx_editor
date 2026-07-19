@@ -42,7 +42,7 @@ export function realmPlugin<Params>(plugin: {
 }
 
 /** @internal */
-When export function RealmWithPlugins({ children, plugins }: { children: React.ReactNode; plugins: RealmPlugin[] }) {
+export function RealmWithPlugins({ children, plugins }: { children: React.ReactNode; plugins: RealmPlugin[] }) {
   const [theRealm, setTheRealm] = React.useState<Realm | null>(null)
 
   React.useEffect(() => {
